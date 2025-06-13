@@ -24,7 +24,9 @@ classdef SimplifiedVleoAerodynamics < ModelBase
                                                     DCM_B_from_CAD, ...
                                                     center_of_mass_CAD, ...
                                                     show_body_flag, ...
-                                                    temperature_ratio_method)
+                                                    temperature_ratio_method,...
+                                                    model,...
+                                                    LUT_data)
         % SimplifiedVleoAerodynamics
         %
         %   Inputs:
@@ -48,6 +50,8 @@ classdef SimplifiedVleoAerodynamics < ModelBase
                 center_of_mass_CAD % will be validated in importMultipleBodies
                 show_body_flag (1,1) logical = false
                 temperature_ratio_method (1,1) {mustBeInteger, mustBePositive} = 1
+                model {mustBeMember(model, [1, 2, 3])} = 1
+                LUT_data (:,5) {mustBeNumeric, mustBeReal} = []
             end
 
             bodies = vleo_aerodynamics_core.importMultipleBodies(obj_files, ...
@@ -57,9 +61,11 @@ classdef SimplifiedVleoAerodynamics < ModelBase
                                 surface_energy_accommodation_coefficients, ...
                                 DCM_B_from_CAD, ...
                                 center_of_mass_CAD);
+                                
             Parameters.bodies = bodies;
-
             Parameters.temperature_ratio_method = temperature_ratio_method;
+            Parameters.model = model;
+            Parameters.LUT_data = LUT_data;
 
             if show_body_flag
                 vleo_aerodynamics_core.showBodies(bodies, zeros(size(obj_files)));
