@@ -68,7 +68,7 @@ classdef SimplifiedVleoAerodynamics < ModelBase
             Parameters.LUT_data = LUT_data;
 
             if show_body_flag
-                vleo_aerodynamics_core.showBodies(bodies, zeros(size(obj_files)));
+                vleo_aerodynamics_core.showBodies(bodies, zeros(size(bodies)));
             end
 
             %% Set Parameters in ModelBase Constructor
