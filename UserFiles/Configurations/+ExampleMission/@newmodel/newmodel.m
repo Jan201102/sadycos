@@ -14,8 +14,10 @@ classdef newmodel < ExampleMission.DefaultConfiguration
             surface_temperature__K = 300;
             particles_mass__kg = 16 * 1.6605390689252e-27;
             density__kg_per_m3 = particles_mass__kg * n;
+            orbital_velocity__m_per_s = 7800;
             energy_accommodation = (7.5e-17 * n * temperature__K)/(1+7.5e-17 * n * temperature__K);
             %END PARAMETERS FROM DSMC
+            gravitational_parameter_Earth = 3.986004e14;
 
             for i = 1:2
                 %set correct parameters for the geometric model
@@ -27,9 +29,15 @@ classdef newmodel < ExampleMission.DefaultConfiguration
                 parameters_cells{i}.Environment.atmospheric_number_density__1_per_m3 = n;
                 parameters_cells{i}.Environment.atmospheric_temperature__K = temperature__K;
 
+                %set correct orbital velocity
+                %parameters_cells{i}.General.States.InitialStates.Plant.RigidBody.velocity_BI_I__m_per_s = [ 0 ; orbital_velocity__m_per_s ; 0 ];
+                %parameters_cells{i}.General.States.InitialStates.Plant.RigidBody.position_BI_I__m = [ gravitational_parameter_Earth/(orbital_velocity__m_per_s^2) ; 0; 0];
+                parameters_cells{i}.General.States.InitialStates.Plant.RigidBody.velocity_BI_I__m_per_s = [ orbital_velocity__m_per_s ; 0 ; 0 ];
+                parameters_cells{i}.General.States.InitialStates.Plant.RigidBody.position_BI_I__m = [0 ; 0; -gravitational_parameter_Earth/(orbital_velocity__m_per_s^2)];
+                
                 %reduce sim time for faster verification
                 stop_time_setting = parameters_cells{i}.Settings(1); % StopTime is the first setting
-                stop_time_setting.value = "2000"; % Change from default 1000s to 500s
+                stop_time_setting.value = "500"; % Change from default 1000s to 500s
                 parameters_cells{i}.Settings(1) = stop_time_setting;
             end
         end
