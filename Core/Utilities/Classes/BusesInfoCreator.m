@@ -107,6 +107,61 @@ classdef BusesInfoCreator < handle
             obj.setBus(name, aBus);
         end
 
+        function extendBusByElements(obj, name, elements)
+        %% extendBusByElements
+        % Extend an existing bus with additional elements.
+        %
+        % Inputs:
+        %   name: Name of the bus to extend.
+        %   elements: Elements to add to the bus.
+        %
+
+            arguments
+                obj BusesInfoCreator
+                name {mustBeTextScalar}
+                elements (:,1) Simulink.BusElement
+            end
+
+            % Check if bus exists
+            bus_index = find(strcmp(name, string({obj.buses_list.Name})), 1);
+            if isempty(bus_index)
+                % Bus doesn't exist, create it with the provided elements
+                aBus = Simulink.Bus;
+                aBus.Elements = elements;
+                obj.setBus(name, aBus);
+                return;
+            end
+
+            % Bus exists, extend it
+            existing_bus = obj.buses_list(bus_index).Bus;
+            existing_elements = existing_bus.Elements;
+
+            % Check for duplicate element names
+            existing_names = {existing_elements.Name};
+            new_names = {elements.Name};
+            
+            [duplicate_names, ~] = intersect(existing_names, new_names);
+            if ~isempty(duplicate_names)
+                warning('The following element names already exist in bus "%s" and will be overwritten: %s', ...
+                        name, strjoin(duplicate_names, ', '));
+                
+                % Remove duplicates from existing elements
+                keep_indices = ~ismember(existing_names, duplicate_names);
+                existing_elements = existing_elements(keep_indices);
+            end
+
+            % Combine existing and new elements
+            combined_elements = [existing_elements(:); elements(:)];
+
+            % Create extended bus
+            extended_bus = Simulink.Bus;
+            extended_bus.Elements = combined_elements;
+
+            % Update the bus (this will trigger the overwrite warning from setBus)
+            warning('Extending bus "%s" with new elements. this will trigger the overwrite warning from setBus', name);
+            obj.setBus(name, extended_bus);
+        end
+
         function setBus(obj, name, bus)
         %% setBus
         % Set a bus.
