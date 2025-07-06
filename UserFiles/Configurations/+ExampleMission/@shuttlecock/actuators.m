@@ -1,0 +1,39 @@
+function [ActuatorsOutputs,...
+            LogActuators, ...
+            ActuatorsStatesUpdateInput] ...
+            = actuators(ActuatorsOutputs, ...
+                        LogActuators, ...
+                        ActuatorsStatesUpdateInput, ...
+                        EnvironmentConditions, ...
+                        PlantOutputs, ...
+                        ActuatorsCommands, ...
+                        ActuatorsStates, ...
+                        ParametersActuators)
+
+%% Abbreviations
+
+% GncAlgorithms
+rw_torque_commands__N_m = ActuatorsCommands.ReactionWheels.torque_commands__N_m;
+magnetic_dipole_moment_commands__A_m2 = ActuatorsCommands.MagneticTorquers.magnetic_dipole_moment_commands__A_m2;
+
+%% Set Output
+
+% Magnetic Torquers
+magnetic_dipole_moment_B__A_m2 ...
+    = GenericMagneticTorquers.execute(magnetic_dipole_moment_commands__A_m2, ...
+                                ParametersActuators.GenericMagneticTorquers);
+
+%% Set Outputs
+ActuatorsOutputs.ReactionWheels.torque_commands__N_m = rw_torque_commands__N_m;
+ActuatorsOutputs.MagneticTorquers.magnetic_dipole_moment_B__A_m2 = magnetic_dipole_moment_B__A_m2;
+ActuatorsOutputs.ControlSurfaces.control_surface_angles__rad = ParametersActuators.control_surfaces_angles__rad;
+
+%% Update States
+% no states -> ActuatorsStatesUpdateInput can stay unaltered
+
+%% Log relevant data
+LogActuators.ActuatorsOutputs = ActuatorsOutputs;
+LogActuators.ActuatorsStates = ActuatorsStates;
+LogActuators.ActuatorsStatesUpdateInput = ActuatorsStatesUpdateInput;
+
+end
