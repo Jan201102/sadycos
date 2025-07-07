@@ -10,6 +10,10 @@ classdef geometry < ExampleMission.shuttlecock
             parameters_cells{1}.Plant.SimplifiedVleoAerodynamics.LUT_data = [];
             parameters_cells{3}.Plant.SimplifiedVleoAerodynamics.model = 1;
             parameters_cells{3}.Plant.SimplifiedVleoAerodynamics.LUT_data = [];
+            
+            stop_time_setting = parameters_cells{1}.Settings(1); % StopTime is the first setting
+            stop_time_setting.value = "1000"; % Change from default 1000s to 500s
+            parameters_cells{1}.Settings(1) = stop_time_setting;
         end
         
         function BusesInfo = configureBuses(parameters_cells)

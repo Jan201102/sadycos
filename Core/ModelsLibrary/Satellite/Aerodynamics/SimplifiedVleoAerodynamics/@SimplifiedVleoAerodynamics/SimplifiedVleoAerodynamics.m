@@ -39,6 +39,8 @@ classdef SimplifiedVleoAerodynamics < ModelBase
         %   center_of_mass_CAD: 3x1 vector of center of mass in CAD frame
         %   show_body_flag: Flag to show body in 3D viewer
         %   temperature_ratio_method: Method to calculate temperature ratio
+        %   model: Model type 1: Sentman, 2: IRS, 3: dummy
+        %   LUT_data: Look-up table data for model 1 and 2
         %
             arguments
                 obj_files % will be validated in importMultipleBodies
@@ -51,7 +53,7 @@ classdef SimplifiedVleoAerodynamics < ModelBase
                 show_body_flag (1,1) logical = false
                 temperature_ratio_method (1,1) {mustBeInteger, mustBePositive} = 1
                 model {mustBeMember(model, [1, 2, 3])} = 1
-                LUT_data (:,5) {mustBeNumeric, mustBeReal} = []
+                LUT_data = [];
             end
 
             bodies = vleo_aerodynamics_core.importMultipleBodies(obj_files, ...

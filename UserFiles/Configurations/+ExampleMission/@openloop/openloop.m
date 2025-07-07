@@ -98,7 +98,7 @@ classdef openloop < ExampleMission.shuttlecock
             grid on;
         end
 
-        function pitch_freq = eval_pitch_freq(obj)
+        function pitch_freq__rad_per_s = eval_pitch_freq(obj)
             % Extract required data from logPlant
             logPlant = getElement(obj.simulation_outputs.logsout, "LogPlantDynamics");
             q_BI = logPlant.Values.PlantStates.RigidBody.attitude_quaternion_BI.Data'; % 4xN [w x y z]
@@ -115,16 +115,14 @@ classdef openloop < ExampleMission.shuttlecock
                 pitch(k) = asin(-dcm_BI(1,3));
             end
             
-            % Convert to degrees
-            pitch = rad2deg(pitch);
-            
             % Calculate frequency of oscillation
             [pks, locs] = findpeaks(pitch);
             if length(locs) > 1
                 period = mean(diff(t(locs)));
-                pitch_freq = 1 / period;
+                pitch_freq__rad_per_s = 2 * pi / period;
             else
-                pitch_freq = NaN; % Not enough peaks to determine frequency
+                warning('Not enough peaks found to determine frequency.');
+                pitch_freq__rad_per_s = NaN; % Not enough peaks to determine frequency
             end
             
         end
