@@ -1,7 +1,7 @@
-classdef NewVsSentman < ExampleMission.shuttlecock
+classdef NewVsSentman < ExampleMission.newmodel
     methods (Static)
         function parameters_cells = configureParameters()
-            parameters_cells = repmat(configureParameters@ExampleMission.shuttlecock(),2,1);
+            parameters_cells = repmat(configureParameters@ExampleMission.newmodel(),2,1);
             % set sentman model for 2nd simulation
             parameters_cells{2}.Plant.SimplifiedVleoAerodynamics.model = 1; 
             parameters_cells{2}.Plant.SimplifiedVleoAerodynamics.LUT_data = [];
@@ -13,7 +13,7 @@ classdef NewVsSentman < ExampleMission.shuttlecock
             BusesInfo = repmat(struct('buses_list',{},'BusTemplates',{}), 1, num_simulations);
 
             for index = 1:num_simulations
-                BusesInfo(index) = configureBuses@ExampleMission.DefaultConfiguration(parameters_cells(index));                
+                BusesInfo(index) = configureBuses@ExampleMission.newmodel(parameters_cells(index));                
             end
 
         end
@@ -24,7 +24,7 @@ classdef NewVsSentman < ExampleMission.shuttlecock
             simulation_inputs(num_simulations) = Simulink.SimulationInput;
 
             for index = 1:num_simulations
-                simulation_inputs(index) = configureSimulationInputs@ExampleMission.DefaultConfiguration(parameters_cells(index), BusesInfo(index));
+                simulation_inputs(index) = configureSimulationInputs@ExampleMission.newmodel(parameters_cells(index), BusesInfo(index));
             end
 
         end

@@ -30,12 +30,12 @@ classdef newmodel < ExampleMission.DefaultConfiguration
             parameters_cells{1}.Environment.atmospheric_temperature__K = temperature__K;
 
             %set correct orbital velocity
-            parameters_cells{1}.General.States.InitialStates.Plant.RigidBody.velocity_BI_I__m_per_s = [ orbital_velocity__m_per_s ; 0 ; 0 ];
-            parameters_cells{1}.General.States.InitialStates.Plant.RigidBody.position_BI_I__m = [0 ; 0; -gravitational_parameter_Earth__m3_per_s2/(orbital_velocity__m_per_s^2)];
+            parameters_cells{1}.General.States.InitialStates.Plant.RigidBody.velocity_BI_I__m_per_s = [0;orbital_velocity__m_per_s;0];
+            parameters_cells{1}.General.States.InitialStates.Plant.RigidBody.position_BI_I__m = [gravitational_parameter_Earth__m3_per_s2/(orbital_velocity__m_per_s^2);0 ; 0];
 
             %reduce sim time for faster verification
             stop_time_setting = parameters_cells{1}.Settings(1); % StopTime is the first setting
-            stop_time_setting.value = "100"; % Change from default 1000s to 500s
+            stop_time_setting.value = "1000"; % Change from default 1000s to 500s
             parameters_cells{1}.Settings(1) = stop_time_setting;
 
         end
@@ -55,56 +55,59 @@ classdef newmodel < ExampleMission.DefaultConfiguration
     end
     methods
         function plot_torques_and_forces(obj)
-            % Assuming you have:
-            logPlant = getElement(obj.simulation_outputs.logsout, "LogPlantDynamics");
+            num_sim = numel(obj.simulation_outputs);
+            for i = 1:num_sim
+                % Assuming you have:
+                logPlant = getElement(obj.simulation_outputs(i).logsout, "LogPlantDynamics");
 
-            % Extract forces and torques from logPlant
-            forces = logPlant.Values.Forces;
-            torques = logPlant.Values.Torques;
-            t_force = forces.aerodynamic_force_B__N.Time;
-            t_torque = torques.net_torque_B__N_m.Time;
-            labels = {'roll','pitch','yaw'};
-            force_labels = {'x','y','z'};
+                % Extract forces and torques from logPlant
+                forces = logPlant.Values.Forces;
+                torques = logPlant.Values.Torques;
+                t_force = forces.aerodynamic_force_B__N.Time;
+                t_torque = torques.net_torque_B__N_m.Time;
+                labels = {'roll','pitch','yaw'};
+                force_labels = {'x','y','z'};
 
-            figure('Name','Torques and Aerodynamic Force (B-frame)','NumberTitle','off');
+                figure('Name',sprintf('Torques and Aerodynamic Force (B-frame) for sim %d',i),'NumberTitle','off');
 
-            subplot(3,2,1)
-            plot(t_torque, torques.net_torque_B__N_m.Data)
-            xlabel('Time [s]'); ylabel('Torque [Nm]');
-            title('Net Torque (B-frame)');
-            legend(labels);
+                subplot(3,2,1)
+                plot(t_torque, torques.net_torque_B__N_m.Data)
+                xlabel('Time [s]'); ylabel('Torque [Nm]');
+                title('Net Torque (B-frame)');
+                legend(labels);
 
-            subplot(3,2,2)
-            plot(t_torque, torques.aerodynamic_torque_B__Nm.Data)
-            xlabel('Time [s]'); ylabel('Torque [Nm]');
-            title('Aerodynamic Torque (B-frame)');
-            legend(labels);
+                subplot(3,2,2)
+                plot(t_torque, torques.aerodynamic_torque_B__Nm.Data)
+                xlabel('Time [s]'); ylabel('Torque [Nm]');
+                title('Aerodynamic Torque (B-frame)');
+                legend(labels);
 
-            subplot(3,2,3)
-            plot(t_torque, torques.magnetic_torque_B__N_m.Data)
-            xlabel('Time [s]'); ylabel('Torque [Nm]');
-            title('Magnetic Torque (B-frame)');
-            legend(labels);
+                subplot(3,2,3)
+                plot(t_torque, torques.magnetic_torque_B__N_m.Data)
+                xlabel('Time [s]'); ylabel('Torque [Nm]');
+                title('Magnetic Torque (B-frame)');
+                legend(labels);
 
-            subplot(3,2,4)
-            plot(t_torque, torques.reaction_torque_B__N_m.Data)
-            xlabel('Time [s]'); ylabel('Torque [Nm]');
-            title('Reaction Torque (B-frame)');
-            legend(labels);
+                subplot(3,2,4)
+                plot(t_torque, torques.reaction_torque_B__N_m.Data)
+                xlabel('Time [s]'); ylabel('Torque [Nm]');
+                title('Reaction Torque (B-frame)');
+                legend(labels);
 
-            subplot(3,2,5)
-            plot(t_torque, torques.gyroscopic_torque_B__N_m.Data)
-            xlabel('Time [s]'); ylabel('Torque [Nm]');
-            title('Gyroscopic Torque (B-frame)');
-            legend(labels);
+                subplot(3,2,5)
+                plot(t_torque, torques.gyroscopic_torque_B__N_m.Data)
+                xlabel('Time [s]'); ylabel('Torque [Nm]');
+                title('Gyroscopic Torque (B-frame)');
+                legend(labels);
 
-            subplot(3,2,6)
-            plot(t_force, forces.aerodynamic_force_B__N.Data)
-            xlabel('Time [s]'); ylabel('Force [N]');
-            title('Aerodynamic Force (B-frame)');
-            legend(force_labels);
+                subplot(3,2,6)
+                plot(t_force, forces.aerodynamic_force_B__N.Data)
+                xlabel('Time [s]'); ylabel('Force [N]');
+                title('Aerodynamic Force (B-frame)');
+                legend(force_labels);
 
-            sgtitle('Torques and Aerodynamic Force Acting on Satellite (Body Frame)');
+                sgtitle(sprintf('Torques and Aerodynamic Force Acting on Satellite (Body Frame) %d', i));
+            end
         end
         function plot_attitude(obj)
             % Extract required data from logPlant
@@ -157,45 +160,61 @@ classdef newmodel < ExampleMission.DefaultConfiguration
             grid on;
         end
 
-    function  plot_angular_acceleration(obj)
-    % Extract required data from logPlant
-    logPlant = getElement(obj.simulation_outputs.logsout, "LogPlantDynamics");
-    
-    % Extract angular acceleration data
-    angular_accel = logPlant.Values.PlantFeedthrough.RigidBodyAccelerations.rotational_acceleration_BI_B__rad_per_s2.Data';
-    t = logPlant.Values.PlantFeedthrough.RigidBodyAccelerations.rotational_acceleration_BI_B__rad_per_s2.Time';
-    
-    % Also extract angular velocity for comparison
-    angular_vel = logPlant.Values.PlantStates.RigidBody.angular_velocity_BI_B__rad_per_s.Data';
-    t_vel = logPlant.Values.PlantStates.RigidBody.angular_velocity_BI_B__rad_per_s.Time';
-    disp(angular_vel);
-    % Labels for axes
-    labels = {'Roll (x)', 'Pitch (y)', 'Yaw (z)'};
-    colors = {'r', 'g', 'b'};
-    
-    figure('Name','Angular Velocity and Angular Acceleration (Body Frame)','NumberTitle','off');
-    
-    % Top row: Angular acceleration for each axis
-    for i = 1:3
-        subplot(2,3,i)
-        plot(t, angular_accel(i,:), colors{i}, 'LineWidth', 1.5);
-        xlabel('Time [s]'); 
-        ylabel('Angular Acceleration [rad/s²]');
-        title(['Angular Acceleration - ' labels{i}]);
-        grid on;
-    end
-    
-    % Bottom row: Angular velocity for each axis
-    for i = 1:3
-        subplot(2,3,i+3)
-        plot(t_vel, angular_vel(i,:), colors{i}, 'LineWidth', 1.5);
-        xlabel('Time [s]'); 
-        ylabel('Angular Velocity [rad/s]');
-        title(['Angular Velocity - ' labels{i}]);
-        grid on;
-    end
-    
-    sgtitle('Satellite Angular Motion (Body Frame)');
-end
+        function  plot_angular_acceleration(obj)
+            % Extract required data from logPlant
+            logPlant = getElement(obj.simulation_outputs.logsout, "LogPlantDynamics");
+            
+            % Extract angular acceleration data
+            angular_accel = logPlant.Values.PlantFeedthrough.RigidBodyAccelerations.rotational_acceleration_BI_B__rad_per_s2.Data';
+            t = logPlant.Values.PlantFeedthrough.RigidBodyAccelerations.rotational_acceleration_BI_B__rad_per_s2.Time';
+            
+            % Also extract angular velocity for comparison
+            angular_vel = logPlant.Values.PlantStates.RigidBody.angular_velocity_BI_B__rad_per_s.Data';
+            t_vel = logPlant.Values.PlantStates.RigidBody.angular_velocity_BI_B__rad_per_s.Time';
+            disp(angular_vel);
+            % Labels for axes
+            labels = {'Roll (x)', 'Pitch (y)', 'Yaw (z)'};
+            colors = {'r', 'g', 'b'};
+            
+            figure('Name','Angular Velocity and Angular Acceleration (Body Frame)','NumberTitle','off');
+            
+            % Top row: Angular acceleration for each axis
+            for i = 1:3
+                subplot(2,3,i)
+                plot(t, angular_accel(i,:), colors{i}, 'LineWidth', 1.5);
+                xlabel('Time [s]'); 
+                ylabel('Angular Acceleration [rad/s²]');
+                title(['Angular Acceleration - ' labels{i}]);
+                grid on;
+            end
+            
+            % Bottom row: Angular velocity for each axis
+            for i = 1:3
+                subplot(2,3,i+3)
+                plot(t_vel, angular_vel(i,:), colors{i}, 'LineWidth', 1.5);
+                xlabel('Time [s]'); 
+                ylabel('Angular Velocity [rad/s]');
+                title(['Angular Velocity - ' labels{i}]);
+                grid on;
+            end
+            
+            sgtitle('Satellite Angular Motion (Body Frame)');
+        end
+        function fig = plotRms(obj)
+            %error_sentman = getElement(obj.simulation_outputs(1).logsout,"LogGncAlgorithms").Values.error_quaternion_RB;
+            error_new = getElement(obj.simulation_outputs(2).logsout,"LogGncAlgorithms").Values.error_quaternion_RB;
+            %[~, angles_sentman] = smu.unitQuat.rot.toAxisAngle((sign(error_sentman.Data(:,1)) .* error_sentman.Data)');
+            [~, angles_new] = smu.unitQuat.rot.toAxisAngle((sign(error_new.Data(:,1)) .* error_new.Data)');
+
+            fig = figure;
+            %plot(error_sentman.Time,angles_sentman, 'LineWidth', 2);
+            %hold on;
+            plot(error_new.Time, angles_new,'LineWidth', 2);
+            grid on;
+            ylabel('Angle (rad)');
+            xlabel('Time (s)');
+            %legend('Sentman', 'New Model');
+            title('Quaternion Error Comparison');
+        end
     end
 end
