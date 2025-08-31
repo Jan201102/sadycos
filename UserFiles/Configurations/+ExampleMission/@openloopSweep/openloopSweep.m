@@ -120,7 +120,7 @@ classdef openloopSweep < ExampleMission.openloop
 
             [angle_sim,frequencys] = obj.get_pitch_frequencies();
             angle_sim = rad2deg(angle_sim); % Convert simulation angles to degrees
-
+            disp(frequencys)
             %plot analyticaldata and add markers for simulation data
             figure('Name','Pitch Frequency Comparison','NumberTitle','off');
             hold on;

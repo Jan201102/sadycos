@@ -15,7 +15,7 @@ classdef shuttlecock < ExampleMission.newmodel
             lx__m = 0.3; % Length of the shuttlecock in meters
             ly__m = 0.1; % Width of the shuttlecock in meters
             lz__m = 0.1; % Height of the shuttlecock in meters
-            mass__kg = 0.907;
+            mass__kg = 4.5;
             inertia__kg_m2 = mass__kg/12 * [ly__m^2 + lz__m^2, 0, 0;...
                                         0, lx__m^2 + lz__m^2, 0;...
                                         0, 0, lx__m^2 + ly__m^2];
@@ -55,7 +55,7 @@ classdef shuttlecock < ExampleMission.newmodel
 
             %set stoptime
             stop_time_setting = parameters_cells{1}.Settings(1); % StopTime is the first setting
-            stop_time_setting.value = "5";
+            stop_time_setting.value = "1000";
             parameters_cells{1}.Settings(1) = stop_time_setting;
         end
 
