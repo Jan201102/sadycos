@@ -4,9 +4,9 @@ classdef newmodel < ExampleMission.DefaultConfiguration
             parameters_cells = configureParameters@ExampleMission.DefaultConfiguration();
             parameters_cells{1}.Plant.SimplifiedVleoAerodynamics.model = 2;
             [this_folder,~,~] = fileparts(mfilename("fullpath"));
-            lut_path = string(fullfile(this_folder, 'aerodynamic_coefficients_panel_method.csv'));
+            lut_path = string(fullfile(this_folder, 'aerodynamic_coefficients_combined.csv'));
             LUT_data = readmatrix(lut_path);
-            LUT_data = griddedInterpolant(LUT_data(:,1),LUT_data(:,2:5));
+            LUT_data = griddedInterpolant(LUT_data(:,1),LUT_data(:,2:3));
             parameters_cells{1}.Plant.SimplifiedVleoAerodynamics.LUT_data = LUT_data;
 
             % PARAMETERS FROM DSMC
