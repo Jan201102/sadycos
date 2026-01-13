@@ -26,7 +26,8 @@ classdef SimplifiedVleoAerodynamics < ModelBase
                                                     show_body_flag, ...
                                                     temperature_ratio_method,...
                                                     model,...
-                                                    LUT_data)
+                                                    aerodynamic_coefficients,...
+                                                    gpu_shading)
         % SimplifiedVleoAerodynamics
         %
         %   Inputs:
@@ -39,6 +40,9 @@ classdef SimplifiedVleoAerodynamics < ModelBase
         %   center_of_mass_CAD: 3x1 vector of center of mass in CAD frame
         %   show_body_flag: Flag to show body in 3D viewer
         %   temperature_ratio_method: Method to calculate temperature ratio
+        %   model: Aerodynamic model to use (1, 2, or 3)
+        %   LUT_data: Lookup table data for aerodynamic coefficients (used for model 2)
+        %   gpu_shading: Flag to enable GPU shading
         %
             arguments
                 obj_files % will be validated in importMultipleBodies
@@ -49,9 +53,10 @@ classdef SimplifiedVleoAerodynamics < ModelBase
                 DCM_B_from_CAD % will be validated in importMultipleBodies
                 center_of_mass_CAD % will be validated in importMultipleBodies
                 show_body_flag (1,1) logical = false
-                temperature_ratio_method (1,1) {mustBeInteger, mustBePositive} = 1
+                temperature_ratio_method {mustBeMember(temperature_ratio_method, [1, 2, 3])} = 1
                 model {mustBeMember(model, [1, 2, 3])} = 1
-                LUT_data (:,5) {mustBeNumeric, mustBeReal} = []
+                aerodynamic_coefficients = struct()
+                gpu_shading logical = false
             end
 
             bodies = vleo_aerodynamics_core.importMultipleBodies(obj_files, ...
@@ -65,7 +70,8 @@ classdef SimplifiedVleoAerodynamics < ModelBase
             Parameters.bodies = bodies;
             Parameters.temperature_ratio_method = temperature_ratio_method;
             Parameters.model = model;
-            Parameters.LUT_data = LUT_data;
+            Parameters.aerodynamic_coefficients = aerodynamic_coefficients;
+            Parameters.gpu_shading = gpu_shading;
 
             if show_body_flag
                 vleo_aerodynamics_core.showBodies(bodies, zeros(size(bodies)));
